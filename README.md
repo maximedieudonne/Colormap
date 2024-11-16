@@ -81,7 +81,7 @@ pip install -r requirements.txt
 In the example above:
 1. The initial colormap is white from 0 to 100.
 2. A blue color is added for the range `[20, 40]`.
-3. A green color is added for the range `[5, 35]`.
+3. A orange color is added for the range `[20, 25]`.
    - Blue is updated to `[35, 40]` to avoid overlap.
    - White fills the remaining intervals.
 
