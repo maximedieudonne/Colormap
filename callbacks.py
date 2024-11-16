@@ -1,53 +1,46 @@
 import json
-import base64
 from dash import Input, Output, State, ctx, html, no_update
 import plotly.graph_objects as go
 from matplotlib.colors import to_hex, to_rgba
 
-# Store colormap data
+# Global variables for colormap data
 colormap_data = [{"color": "white", "min": 0, "max": 100}]
+saved_colormaps = {}
+background_color = "white"
 
-# Function to convert color names to hex
-def color_to_hex(color_name):
-    try:
-        return to_hex(to_rgba(color_name))
-    except ValueError:
-        return "#FFFFFF"
+def replace_background_color(new_bg_color):
+    """Replace the background color in the colormap."""
+    global colormap_data, background_color
+    for entry in colormap_data:
+        if entry["color"] == background_color:
+            entry["color"] = new_bg_color
+    background_color = new_bg_color
 
-def split_existing_intervals(new_entry):
+def update_intervals(new_color, new_min, new_max):
+    """Update colormap intervals dynamically based on new input."""
     global colormap_data
-    new_min, new_max, new_color = new_entry["min"], new_entry["max"], new_entry["color"]
     updated_data = []
 
     for entry in colormap_data:
-        entry_min, entry_max, entry_color = entry["min"], entry["max"], entry["color"]
-
-        if entry_max <= new_min or entry_min >= new_max:
+        if entry["max"] <= new_min or entry["min"] >= new_max:
+            # Keep intervals that are completely outside the new range
             updated_data.append(entry)
-        elif entry_min < new_min < entry_max:
-            updated_data.append({"color": entry_color, "min": entry_min, "max": new_min})
-        if entry_min < new_max < entry_max:
-            updated_data.append({"color": entry_color, "min": new_max, "max": entry_max})
+        else:
+            # Adjust or split overlapping intervals
+            if entry["min"] < new_min:
+                updated_data.append({"color": entry["color"], "min": entry["min"], "max": new_min})
+            if entry["max"] > new_max:
+                updated_data.append({"color": entry["color"], "min": new_max, "max": entry["max"]})
 
-    updated_data.append(new_entry)
-    return updated_data
+    # Insert the new interval
+    updated_data.append({"color": new_color, "min": new_min, "max": new_max})
+    updated_data.sort(key=lambda x: x["min"])
 
-def ensure_white_intervals():
-    global colormap_data
-    colormap_data.sort(key=lambda x: x["min"])
-    filled_data = []
-
-    for i in range(len(colormap_data) - 1):
-        filled_data.append(colormap_data[i])
-        if colormap_data[i]["max"] < colormap_data[i + 1]["min"]:
-            filled_data.append({"color": "white", "min": colormap_data[i]["max"], "max": colormap_data[i + 1]["min"]})
-
-    filled_data.append(colormap_data[-1])
-    colormap_data = filled_data
+    colormap_data = updated_data
 
 def generate_colormap():
+    """Generate a Plotly figure for the colormap."""
     fig = go.Figure()
-    transitions = sorted(set([entry["min"] for entry in colormap_data] + [entry["max"] for entry in colormap_data]))
 
     for entry in colormap_data:
         fig.add_trace(
@@ -64,43 +57,33 @@ def generate_colormap():
         xaxis=dict(
             title="Range",
             range=[0, 100],
-            tickvals=transitions,
-            ticktext=[str(val) for val in transitions],
-            tickangle=0,  # Make tick labels straight
+            tickvals=[entry["min"] for entry in colormap_data] + [entry["max"] for entry in colormap_data],
+            ticktext=[entry["min"] for entry in colormap_data] + [entry["max"] for entry in colormap_data],
             showgrid=False,
             zeroline=False,
+            tickangle=0,
         ),
         yaxis=dict(visible=False),
-        height=250,  # Increase height for more visibility
-        margin=dict(l=20, r=20, t=20, b=50),  # Adjust margins for readability
+        height=250,
+        margin=dict(l=20, r=20, t=20, b=50),
     )
     return fig
-
-def format_colormap_info():
-    return [{"color": color_to_hex(entry["color"]), "range": [entry["min"], entry["max"]]} for entry in colormap_data]
-
-def save_colormap_to_file():
-    with open("colormap.json", "w") as f:
-        json.dump(colormap_data, f)
-
-def load_colormap_from_file(contents):
-    global colormap_data
-    content_type, content_string = contents.split(',')
-    decoded = base64.b64decode(content_string)
-    colormap_data = json.loads(decoded.decode('utf-8'))
-    ensure_white_intervals()
 
 def register_callbacks(app):
     @app.callback(
         [
             Output("colormap-visual", "figure"),
             Output("color-info", "children"),
+            Output("colormap-dropdown", "options"),
             Output("save-status", "children"),
+            Output("background-color-dropdown", "options"),
         ],
         [
             Input("add-color-btn", "n_clicks"),
             Input("save-colormap-btn", "n_clicks"),
-            Input("upload-colormap", "contents"),
+            Input("reset-colormap-btn", "n_clicks"),
+            Input("colormap-dropdown", "value"),
+            Input("background-color-dropdown", "value"),
         ],
         [
             State("color-dropdown", "value"),
@@ -108,30 +91,46 @@ def register_callbacks(app):
             State("max-range", "value"),
         ],
     )
-    def update_colormap(n_clicks_add, n_clicks_save, uploaded_contents, color, min_range, max_range):
-        global colormap_data
+    def update_colormap(
+        n_clicks_add, n_clicks_save, n_clicks_reset, selected_colormap, new_bg_color, color, min_range, max_range
+    ):
+        global colormap_data, saved_colormaps, background_color
         save_status = ""
 
+        # Update background color if changed
+        if new_bg_color and new_bg_color != background_color:
+            replace_background_color(new_bg_color)
+
+        # Add a new color interval
         if ctx.triggered_id == "add-color-btn" and color and min_range is not None and max_range is not None:
-            new_entry = {"color": color, "min": min_range, "max": max_range}
-            colormap_data = split_existing_intervals(new_entry)
-            ensure_white_intervals()
+            update_intervals(color, min_range, max_range)
 
+        # Save the current colormap
         if ctx.triggered_id == "save-colormap-btn":
-            save_colormap_to_file()
-            save_status = "Colormap sauvegardée"
+            colormap_name = f"colormap_{len(saved_colormaps) + 1:02d}"
+            saved_colormaps[colormap_name] = list(colormap_data)
+            save_status = f"{colormap_name} saved"
+            with open(f"{colormap_name}.json", "w") as file:
+                json.dump(colormap_data, file, indent=4)
 
-        if ctx.triggered_id == "upload-colormap" and uploaded_contents:
-            load_colormap_from_file(uploaded_contents)
+        # Reset to default colormap
+        if ctx.triggered_id == "reset-colormap-btn":
+            colormap_data = [{"color": "white", "min": 0, "max": 100}]
+            background_color = "white"
+            save_status = "Colormap reset to default"
 
+        # Load a selected colormap
+        if ctx.triggered_id == "colormap-dropdown" and selected_colormap:
+            colormap_data = saved_colormaps[selected_colormap]
+
+        # Generate the visualization
         colormap_figure = generate_colormap()
         colormap_info = [
             f"Color: {entry['color']}, Range: [{entry['min']}, {entry['max']}]"
             for entry in colormap_data
         ]
 
-        return (
-            colormap_figure,
-            [html.Div(info) for info in colormap_info],
-            save_status if save_status else no_update,
-        )
+        dropdown_options = [{"label": name, "value": name} for name in saved_colormaps.keys()]
+        bg_color_options = [{"label": c.title(), "value": c} for c in {"white", "black", "gray", "lightblue", "lightgreen", new_bg_color}]
+
+        return colormap_figure, [html.Div(info) for info in colormap_info], dropdown_options, save_status, bg_color_options
