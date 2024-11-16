@@ -43,6 +43,17 @@ def create_layout():
                     ),
                     html.Br(),
                     html.Button("Add Color", id="add-color-btn", n_clicks=0),
+                    html.Br(),
+                    html.Br(),
+                    html.Button("Save Colormap", id="save-colormap-btn", n_clicks=0),
+                    html.Span(id="save-status", style={"marginLeft": "10px", "color": "green"}),
+                    html.Br(),
+                    html.Br(),
+                    dcc.Upload(
+                        id="upload-colormap",
+                        children=html.Button("Import Colormap"),
+                        multiple=False,
+                    ),
                 ],
                 style={"width": "30%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"},
             ),
@@ -51,7 +62,7 @@ def create_layout():
             html.Div(
                 [
                     html.Label("Colormap Visualization:"),
-                    dcc.Graph(id="colormap-visual", style={"height": "200px", "width": "100%"}),
+                    dcc.Graph(id="colormap-visual", style={"height": "250px", "width": "100%"}),
                     html.Div(
                         id="color-info",
                         style={"marginTop": "20px", "fontSize": "16px", "textAlign": "left"},
