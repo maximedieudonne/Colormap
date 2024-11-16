@@ -1,0 +1,27 @@
+[
+    {
+        "color": "black",
+        "min": 0,
+        "max": 100
+    },
+    {
+        "color": "green",
+        "min": 5,
+        "max": 7
+    },
+    {
+        "color": "black",
+        "min": 7,
+        "max": 30
+    },
+    {
+        "color": "orange",
+        "min": 30,
+        "max": 50
+    },
+    {
+        "color": "purple",
+        "min": 40,
+        "max": 60
+    }
+]
