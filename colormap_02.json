@@ -2,26 +2,26 @@
     {
         "color": "lightgreen",
         "min": 0,
-        "max": 10
-    },
-    {
-        "color": "blue",
-        "min": 10,
         "max": 15
     },
     {
-        "color": "orange",
+        "color": "blue",
         "min": 15,
-        "max": 35
+        "max": 20
     },
     {
-        "color": "red",
-        "min": 35,
-        "max": 40
+        "color": "orange",
+        "min": 20,
+        "max": 30
+    },
+    {
+        "color": "blue",
+        "min": 30,
+        "max": 55
     },
     {
         "color": "lightgreen",
-        "min": 40,
+        "min": 55,
         "max": 100
     }
 ]
