@@ -200,6 +200,22 @@ def create_layout():
                                                     "marginRight": "10px",
                                                 },
                                             ),
+                                            dcc.Upload(
+                                                id="load-colormap-upload",
+                                                children=html.Button(
+                                                    "Load Colormap",
+                                                    style={
+                                                        "padding": "10px 15px",
+                                                        "fontSize": "14px",
+                                                        "backgroundColor": "#5bc0de",
+                                                        "color": "white",
+                                                        "border": "none",
+                                                        "borderRadius": "4px",
+                                                        "cursor": "pointer",
+                                                    },
+                                                ),
+                                                accept=".json",
+                                            ),
                                             html.Span(
                                                 id="save-status",
                                                 style={

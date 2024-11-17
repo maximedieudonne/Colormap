@@ -1,0 +1,22 @@
+[
+    {
+        "color": "lightgreen",
+        "min": 0,
+        "max": 10
+    },
+    {
+        "color": "blue",
+        "min": 10,
+        "max": 15
+    },
+    {
+        "color": "red",
+        "min": 15,
+        "max": 26
+    },
+    {
+        "color": "lightgreen",
+        "min": 26,
+        "max": 100
+    }
+]
