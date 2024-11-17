@@ -1,7 +1,21 @@
-[
-    {
-        "color": "white",
-        "min": 0,
-        "max": 100
-    }
-]
+{
+    "data": [
+        {
+            "color": "lightblue",
+            "min": -50,
+            "max": -10
+        },
+        {
+            "color": "blue",
+            "min": -10,
+            "max": 10
+        },
+        {
+            "color": "lightblue",
+            "min": 10,
+            "max": 60
+        }
+    ],
+    "mincolormap": -50,
+    "maxcolormap": 60
+}

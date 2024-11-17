@@ -38,13 +38,76 @@ def create_layout():
                     # Left panel: Options
                     html.Div(
                         style={
-                            "width": "30%",
+                            "width": "25%",  # Reduced width for the left panel
                             "backgroundColor": "#ffffff",
                             "padding": "15px",
                             "borderRadius": "8px",
                             "boxShadow": "0px 4px 8px rgba(0, 0, 0, 0.1)",
                         },
                         children=[
+                            # Section: Set Colormap Bounds (first)
+                            html.Div(
+                                style={
+                                    "marginBottom": "20px",
+                                    "paddingBottom": "15px",
+                                    "borderBottom": "1px solid #d3d3d3",
+                                },
+                                children=[
+                                    html.Label(
+                                        "Set Colormap Bounds",
+                                        style={"fontWeight": "bold", "fontSize": "16px"},
+                                    ),
+                                    html.Div(
+                                        style={"marginTop": "10px"},
+                                        children=[
+                                            html.Label("Min Colormap:", style={"fontSize": "14px"}),
+                                            dcc.Input(
+                                                id="mincolormap",
+                                                type="number",
+                                                placeholder="Enter minimum colormap value",
+                                                value=0,
+                                                style={
+                                                    "width": "100%",
+                                                    "padding": "5px",
+                                                    "fontSize": "14px",
+                                                },
+                                            ),
+                                        ],
+                                    ),
+                                    html.Div(
+                                        style={"marginTop": "10px"},
+                                        children=[
+                                            html.Label("Max Colormap:", style={"fontSize": "14px"}),
+                                            dcc.Input(
+                                                id="maxcolormap",
+                                                type="number",
+                                                placeholder="Enter maximum colormap value",
+                                                value=100,
+                                                style={
+                                                    "width": "100%",
+                                                    "padding": "5px",
+                                                    "fontSize": "14px",
+                                                },
+                                            ),
+                                        ],
+                                    ),
+                                    html.Button(
+                                        "Apply Bounds",
+                                        id="apply-bounds-btn",
+                                        n_clicks=0,
+                                        style={
+                                            "marginTop": "15px",
+                                            "padding": "10px 15px",
+                                            "fontSize": "14px",
+                                            "backgroundColor": "#3e4c6d",
+                                            "color": "white",
+                                            "border": "none",
+                                            "borderRadius": "4px",
+                                            "cursor": "pointer",
+                                        },
+                                    ),
+                                ],
+                            ),
                             # Section: Background Color
                             html.Div(
                                 style={
@@ -249,7 +312,7 @@ def create_layout():
                     # Right panel: Visualization
                     html.Div(
                         style={
-                            "width": "65%",
+                            "width": "70%",  # Increased width for the visualization
                             "backgroundColor": "#ffffff",
                             "padding": "15px",
                             "borderRadius": "8px",
